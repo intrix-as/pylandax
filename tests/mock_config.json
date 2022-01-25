@@ -1,0 +1,10 @@
+{
+	"landax": {
+		"host": "example.landax.no",
+		"client_id": "123456", 
+		"client_secret": "123456",
+		"username": "123456",
+		"password": "123456",
+		"oauth_file": "mock_oauth.json"
+	}
+}
