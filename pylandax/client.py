@@ -29,7 +29,7 @@ class Client:
 		else:
 			self.oauth_data = self.oauth_from_server()
 
-		self.headers['Authorization'] = 'Bearer' + self.oauth_data['access_token']
+		self.headers['Authorization'] = 'Bearer ' + self.oauth_data['access_token']
 
 	def setup_odata_client(self):
 		session = requests.Session()
