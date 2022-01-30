@@ -3,6 +3,7 @@ import requests
 import json
 from pyodata.v2.model import PolicyFatal, PolicyWarning, PolicyIgnore, ParserError, Config
 
+
 class Client:
 	def __init__(self, config : dict):
 		self.required_attrs = [
@@ -22,19 +23,19 @@ class Client:
 		self.api_url = self.base_url + 'api/v19/'
 		self.headers = {}
 
-		self.authenticate()
-
-		# Default: xml format, so use odata client
-		if not hasattr(self, 'format'):
-			self.setup_odata_client()
-
-	def authenticate(self):
-		if self.oauth_file is not None:
+		if hasattr(self, 'oauth_file'):
 			self.oauth_data = self.oauth_from_file()
 		else:
 			self.oauth_data = self.oauth_from_server()
 
 		self.headers['Authorization'] = 'Bearer ' + self.oauth_data['access_token']
+
+		self.odata_client = None
+
+		# Default: xml format, so use odata client
+		if not hasattr(self, 'format'):
+			self.format = 'xml'
+			self.setup_odata_client()
 
 	def setup_odata_client(self):
 		session = requests.Session()
@@ -42,8 +43,8 @@ class Client:
 		odata_config = Config(
 			default_error_policy=PolicyFatal(),
 			custom_error_policies={
-				 ParserError.ANNOTATION: PolicyWarning(),
-				 ParserError.ASSOCIATION: PolicyIgnore()
+				ParserError.ANNOTATION: PolicyWarning(),
+				ParserError.ASSOCIATION: PolicyIgnore()
 			})
 
 		self.odata_client = pyodata.Client(self.api_url, session, config=odata_config)
