@@ -23,7 +23,10 @@ class Client:
 		self.headers = {}
 
 		self.authenticate()
-		self.setup_odata_client()
+
+		# Default: xml format, so use odata client
+		if not hasattr(self, 'format'):
+			self.setup_odata_client()
 
 	def authenticate(self):
 		if self.oauth_file is not None:
