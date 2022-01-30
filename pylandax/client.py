@@ -5,16 +5,18 @@ from pyodata.v2.model import PolicyFatal, PolicyWarning, PolicyIgnore, ParserErr
 
 class Client:
 	def __init__(self, config : dict):
-		self.host = config['host']
-		self.username = config['username']
-		self.password = config['password']
-		self.client_id = config['client_id']
-		self.client_secret = config['client_secret']
+		self.required_attrs = [
+			'host', 'username', 'password',
+			'client_id', 'client_secret'
+		]
 
-		if 'oauth_file' in config:
-			self.oauth_file = config['oauth_file']
-		else:
-			self.oauth_file = None
+		for key, value in config.items():
+			setattr(self, key, value)
+
+		for attr in self.required_attrs:
+			if not hasattr(self, attr):
+				print(f'Error: config attribute is required: {attr}')
+				return
 
 		self.base_url = f'https://{self.host}/'
 		self.api_url = self.base_url + 'api/v19/'
