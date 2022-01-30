@@ -32,9 +32,11 @@ class Client:
 
 		self.odata_client = None
 
-		# Default: xml format, so use odata client
+		# Default: xml format
 		if not hasattr(self, 'format'):
 			self.format = 'xml'
+
+		if self.format == 'xml':
 			self.setup_odata_client()
 
 	def setup_odata_client(self):
@@ -48,6 +50,23 @@ class Client:
 			})
 
 		self.odata_client = pyodata.Client(self.api_url, session, config=odata_config)
+
+	def get_data(self, data_model: str) -> [{}]:
+		if self.format == 'xml':
+			# WIP: the pyodata library from SAP doesn't parse ATOM correctly
+			# See https://github.com/SAP/python-pyodata/issues/202
+			print('Warning: Using xml format, experimental feature')
+			print(self.odata_client.entity_sets)
+			data = getattr(self.odata_client.entity_sets, data_model)
+			print(data.get_entities().execute())
+		elif self.format == 'json':
+			url = f'{self.api_url}{data_model}?$format=json'
+
+			response = requests.get(url, headers=self.headers)
+
+			return response.json()['d']['results']
+		else:
+			print('Error: Unknown format: ' + self.format)
 
 	# Contact the remote server for an OAuth token
 	def oauth_from_server(self):
