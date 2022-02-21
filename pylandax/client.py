@@ -94,6 +94,12 @@ class Client:
 		response = requests.post(url, json=data, headers=headers)
 		return response
 
+	# Deletes data with the given key
+	def delete_data(self, data_model: str, key: str):
+		url = f'{self.api_url}{data_model}({key})?$format={self.format}'
+		response = requests.delete(url, headers=self.headers)
+		return response
+
 	# Helper function for get_data
 	def request_data(self, url: str) -> []:
 		response = requests.get(url, headers=self.headers)
