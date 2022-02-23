@@ -52,37 +52,36 @@ class Client:
 
 		self.odata_client = pyodata.Client(self.api_url, session, config=odata_config)
 
-	def get_data(self, data_model: str) -> {}:
+	def get_data(self, data_model: str) -> [{}]:
 		if self.format == 'json':
-			initial_url = url = f'{self.api_url}{data_model}?$format=json&$top=1000'
-			metakey = 'Number'
-			values = {}
+			initial_url = f'{self.api_url}{data_model}?$format=json&$top=1000'
 			data = self.request_data(initial_url)
-
-			self.add_list_to_dict(values, data, metakey)
-
 			count = len(data)
 			if count != 1000:
-				return values
+				return data
 
 			# If count is 1000, there is a chance that there are more than 1000 records
+			# since Landax only returns 1000 records max at a time
 			# so we need to make additional requests until we get less than 1000
 			thousands = 0
 			while count == 1000:
 				thousands = thousands + 1
 				new_url = initial_url + '&$skip=' + str(thousands * 1000)
 				new_data = self.request_data(new_url)
-				self.add_list_to_dict(values, new_data, metakey)
+				data = data + new_data
 				count = len(new_data)
 
-			return values
+			return data
+
 		elif self.format == 'xml':
 			# WIP: the pyodata library from SAP doesn't parse ATOM correctly
 			# See https://github.com/SAP/python-pyodata/issues/202
-			print('Warning: Using xml format, experimental feature')
-			print(self.odata_client.entity_sets)
-			data = getattr(self.odata_client.entity_sets, data_model)
-			print(data.get_entities().execute())
+			# There are some other issues as well, so this isn't ready for use
+			raise NotImplementedError
+			# print('Warning: Using xml format, experimental feature')
+			# print(self.odata_client.entity_sets)
+			# data = getattr(self.odata_client.entity_sets, data_model)
+			# print(data.get_entities().execute())
 		else:
 			print('Error: Unknown format: ' + self.format)
 
