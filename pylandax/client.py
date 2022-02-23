@@ -52,7 +52,18 @@ class Client:
 
 		self.odata_client = pyodata.Client(self.api_url, session, config=odata_config)
 
-	def get_data(self, data_model: str) -> [{}]:
+	# Returns a record with the given data_id (Id in in landax)
+	def get_single_data(self, data_model: str, data_id: int):
+		url = f'{self.api_url}{data_model}({str(data_id)})?$format=json'
+		response = requests.get(url, headers=self.headers)
+		if response.status_code == 404:
+			return None
+
+		data = response.json()['d']['results']
+		return data
+
+	# Returns all records of the given data model
+	def get_all_data(self, data_model: str) -> [{}]:
 		if self.format == 'json':
 			initial_url = f'{self.api_url}{data_model}?$format=json&$top=1000'
 			data = self.request_data(initial_url)
@@ -93,8 +104,9 @@ class Client:
 		response = requests.post(url, json=data, headers=headers)
 		return response
 
-	def patch_data(self, data_model: str, data: dict):
-		url = self.api_url + data_model
+	# Patches the given data model with the given id with data
+	def patch_data(self, data_model: str, key: int, data: dict):
+		url = f'{self.api_url}{data_model}({str(key)})'
 		headers = copy.deepcopy(self.headers)
 		headers['Content-Type'] = 'application/json'
 
@@ -105,6 +117,8 @@ class Client:
 	def delete_data(self, data_model: str, key: str):
 		url = f'{self.api_url}{data_model}({key})?$format={self.format}'
 		response = requests.delete(url, headers=self.headers)
+		if response.status_code == 404:
+			return None
 		return response
 
 	# Helper function for get_data
