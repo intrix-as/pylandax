@@ -33,9 +33,9 @@ class Client:
 
 		self.odata_client = None
 
-		# Default: xml format
+		# Default: json format
 		if not hasattr(self, 'format'):
-			self.format = 'xml'
+			self.format = 'json'
 
 		if self.format == 'xml':
 			self.setup_odata_client()
@@ -53,14 +53,7 @@ class Client:
 		self.odata_client = pyodata.Client(self.api_url, session, config=odata_config)
 
 	def get_data(self, data_model: str) -> {}:
-		if self.format == 'xml':
-			# WIP: the pyodata library from SAP doesn't parse ATOM correctly
-			# See https://github.com/SAP/python-pyodata/issues/202
-			print('Warning: Using xml format, experimental feature')
-			print(self.odata_client.entity_sets)
-			data = getattr(self.odata_client.entity_sets, data_model)
-			print(data.get_entities().execute())
-		elif self.format == 'json':
+		if self.format == 'json':
 			initial_url = url = f'{self.api_url}{data_model}?$format=json&$top=1000'
 			metakey = 'Number'
 			values = {}
@@ -83,6 +76,13 @@ class Client:
 				count = len(new_data)
 
 			return values
+		elif self.format == 'xml':
+			# WIP: the pyodata library from SAP doesn't parse ATOM correctly
+			# See https://github.com/SAP/python-pyodata/issues/202
+			print('Warning: Using xml format, experimental feature')
+			print(self.odata_client.entity_sets)
+			data = getattr(self.odata_client.entity_sets, data_model)
+			print(data.get_entities().execute())
 		else:
 			print('Error: Unknown format: ' + self.format)
 
