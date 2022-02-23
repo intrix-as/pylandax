@@ -113,14 +113,16 @@ class Client:
 		results = response.json()['d']['results']
 		return results
 
-	# Modifies the given dict_in with the given list_in using the metakey
+	# Creates a dict given the list of dicts list_in using the metakey
 	@staticmethod
-	def add_list_to_dict(dict_in: {}, list_in: [{}], metakey: str):
+	def list_to_dict(list_in: [{}], metakey: str):
+		return_dict = {}
+
 		for record in list_in:
 			key = record[metakey]
-			if key in dict_in:
-				print(f'Warning: {key} exists in values, overwriting')
-			dict_in[key] = record
+			if key in return_dict:
+				print(f'Warning: {key} already present, overwriting')
+			return_dict[key] = record
 
 	# Contact the remote server for an OAuth token
 	def oauth_from_server(self):
