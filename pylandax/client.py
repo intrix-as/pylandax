@@ -93,6 +93,14 @@ class Client:
 		response = requests.post(url, json=data, headers=headers)
 		return response
 
+	def patch_data(self, data_model: str, data: dict):
+		url = self.api_url + data_model
+		headers = copy.deepcopy(self.headers)
+		headers['Content-Type'] = 'application/json'
+
+		response = requests.patch(url, json=data, headers=headers)
+		return response
+
 	# Deletes data with the given key
 	def delete_data(self, data_model: str, key: str):
 		url = f'{self.api_url}{data_model}({key})?$format={self.format}'
