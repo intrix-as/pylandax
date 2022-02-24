@@ -138,6 +138,8 @@ class Client:
 				print(f'Warning: {key} already present, overwriting')
 			return_dict[key] = record
 
+		return return_dict
+
 	# Contact the remote server for an OAuth token
 	def oauth_from_server(self):
 		url = self.base_url + 'authenticate/token?grant_type=password'
