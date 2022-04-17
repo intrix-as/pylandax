@@ -1,4 +1,4 @@
-import pyodata
+# import pyodata
 import requests
 import json
 import copy
