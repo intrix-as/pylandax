@@ -2,7 +2,7 @@
 import requests
 import json
 import copy
-from pyodata.v2.model import PolicyFatal, PolicyWarning, PolicyIgnore, ParserError, Config
+# from pyodata.v2.model import PolicyFatal, PolicyWarning, PolicyIgnore, ParserError, Config
 
 
 class Client:
