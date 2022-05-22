@@ -8,7 +8,7 @@ import copy
 class Client:
 	def __init__(self, config : dict):
 		self.required_attrs = [
-			'host', 'username', 'password',
+			'url', 'username', 'password',
 			'client_id', 'client_secret'
 		]
 
@@ -20,7 +20,7 @@ class Client:
 				print(f'Error: config attribute is required: {attr}')
 				return
 
-		self.base_url = f'https://{self.host}/'
+		self.base_url = f'https://{self.url}/'
 		self.api_url = self.base_url + 'api/v19/'
 		self.headers = {}
 
