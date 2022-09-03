@@ -124,7 +124,7 @@ class Client:
 	# Helper function for get_data
 	def request_data(self, url: str) -> []:
 		response = requests.get(url, headers=self.headers)
-		results = response.json()['d']['results']
+		results = response.json()['value']
 		return results
 
 	# Creates a dict given the list of dicts list_in using the metakey
