@@ -6,22 +6,22 @@ import copy
 
 
 class Client:
-	def __init__(self, config : dict):
-		self.required_attrs = [
-			'url', 'username', 'password',
+	def __init__(self, url: str, credentials: dict):
+		self.required_credentials = [
+			'username', 'password',
 			'client_id', 'client_secret'
 		]
 
-		for key, value in config.items():
+		for key, value in credentials.items():
 			setattr(self, key, value)
 
-		for attr in self.required_attrs:
+		for attr in self.required_credentials:
 			if not hasattr(self, attr):
-				print(f'Error: config attribute is required: {attr}')
+				print(f'Error: credential field is required: {attr}')
 				return
 
-		self.base_url = f'https://{self.url}/'
-		self.api_url = self.base_url + 'api/v19/'
+		self.base_url = f'https://{url}/'
+		self.api_url = self.base_url + 'api/v20/'
 		self.headers = {}
 
 		if hasattr(self, 'oauth_file'):
