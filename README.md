@@ -29,5 +29,5 @@ new_contact = {
   'Address': 'Park road 123'
 }
 
-client.post_data(new_contact)
+client.post_data('Contacts', new_contact)
 ```
