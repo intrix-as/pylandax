@@ -133,7 +133,7 @@ class Client:
 
 		files = {
 			'document': (None, document),
-			'fileData': (str(file.name), open(file, 'rb'), 'application/pdf')
+			'fileData': (str(file.name), open(file, 'rb'))
 		}
 
 		response = requests.post(url, files=files, headers=self.headers)
