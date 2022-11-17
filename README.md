@@ -31,3 +31,21 @@ new_contact = {
 
 client.post_data('Contacts', new_contact)
 ```
+
+## Uploading documents
+
+To upload a document, it's recommended to pass a Path-object and folder id to the upload_document like so:
+
+```
+from pathlib import Path
+import pylandax
+
+# Credentials and URL as defined above
+client = pylandax.Client(url, credentials)
+# Example values, this case assumes the file is in cwd
+my_file = Path('myfile.pdf')
+folder_id = 100
+
+# The function returns the requests.Response object
+response = client.upload_document(my_file, folder_id)
+```
