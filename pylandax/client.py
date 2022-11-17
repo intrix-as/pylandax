@@ -59,7 +59,7 @@ class Client:
 		if response.status_code == 404:
 			return None
 
-		data = response.json()['d']['results']
+		data = response.json()
 		return data
 
 	# Returns all records of the given data model
