@@ -1,8 +1,8 @@
-# import pyodata
-import requests
+import pathlib
 import json
 import copy
-# from pyodata.v2.model import PolicyFatal, PolicyWarning, PolicyIgnore, ParserError, Config
+
+import requests
 
 
 class Client:
@@ -126,6 +126,19 @@ class Client:
 		response = requests.get(url, headers=self.headers)
 		results = response.json()['value']
 		return results
+
+	def upload_document(self, file: pathlib.Path, folder_id: int):
+		url = self.api_url + 'Documents/CreateDocument'
+		document = json.dumps({'FolderId': folder_id})
+
+		files = {
+			'document': (None, document),
+			'fileData': (str(file.name), open(file, 'rb'), 'application/pdf')
+		}
+
+		response = requests.post(url, files=files, headers=self.headers)
+
+		return response
 
 	# Creates a dict given the list of dicts list_in using the metakey
 	@staticmethod
