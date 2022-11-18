@@ -63,9 +63,9 @@ class Client:
 		return data
 
 	# Returns all records of the given data model
-	def get_all_data(self, data_model: str) -> [{}]:
+	def get_all_data(self, data_model: str, filter: str) -> [{}]:
 		if self.format == 'json':
-			initial_url = f'{self.api_url}{data_model}?$format=json&$top=1000'
+			initial_url = f'{self.api_url}{data_model}{filter}'
 			data = self.request_data(initial_url)
 			count = len(data)
 			if count != 1000:
