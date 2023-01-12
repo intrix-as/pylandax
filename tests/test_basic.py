@@ -1,6 +1,9 @@
 import os
+import sys
 import json
 from pathlib import Path
+
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 
 import pylandax
 

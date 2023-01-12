@@ -1,3 +1,3 @@
-from .client import *
+from .pylandax import *
 
 __all__ = ["Client", "LandaxAuthException"]
