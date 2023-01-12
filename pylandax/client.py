@@ -5,6 +5,10 @@ import copy
 import requests
 
 
+class LandaxAuthException(Exception):
+    pass
+
+
 class Client:
 	def __init__(self, url: str, credentials: dict):
 		self.required_credentials = [
@@ -153,8 +157,7 @@ class Client:
 
 		return return_dict
 
-	# Contact the remote server for an OAuth token
-	def oauth_from_server(self):
+	def get_oauth_token(self):
 		url = self.base_url + 'authenticate/token?grant_type=password'
 
 		post_body = {
@@ -165,11 +168,12 @@ class Client:
 		}
 
 		result = requests.post(url, json=post_body)
-		return result.json()
+		if result.status_code != 200:
+			raise LandaxAuthException('Landax returned non-200 response when getting OAuth token. Body: ' + str(result.content))
 
-	# Load OAuth data from file
-	def oauth_from_file(self):
-		with open(self.oauth_file) as file:
-			data = json.loads(file.read())
+		response_data = result.json()
 
-		return data
+		if 'access_token' not in response_data:
+			raise LandaxAuthException('Landax response was non-json. Body: ' + str(result.content))
+
+		return response_data['access_token']
