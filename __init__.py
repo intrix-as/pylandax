@@ -1,2 +1,2 @@
-from .pylandax import *
+from .src import *
 
