@@ -1,14 +1,20 @@
-import pylandax
+import os
 import json
-from pyodata.exceptions import HttpError
+from pathlib import Path
+
+import pylandax
+
+
+script_dir = Path(os.path.dirname(os.path.realpath(__file__)))
+
 
 def test_basic():
-	with open('mock_config.json') as file:
-		landax_conf = json.loads(file.read())['landax']
+	confpath = Path(script_dir, 'mock_config.json')
+	with open(confpath) as file:
+		conf = json.loads(file.read())['landax']
 
 	try:
-		# Since the oauth token is bogus, we know this won't work
-		# And it will throw a pyodata.exceptions.HttpError
-		client = pylandax.Client(landax_conf)
-	except HttpError:
+		client = pylandax.Client(conf['url'], conf['credentials'])
+	# Since the URL is bogus, this is what we expect
+	except pylandax.LandaxAuthException:
 		pass
