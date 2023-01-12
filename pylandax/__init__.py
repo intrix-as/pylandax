@@ -1,3 +1,3 @@
-from .client import Client
+from .client import *
 
-__all__ = ["Client"]
+__all__ = ["Client", "LandaxAuthException"]
