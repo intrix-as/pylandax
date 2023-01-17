@@ -118,6 +118,7 @@ class Client:
         :param document_data: io.BytesIO object to upload of the document
         :param filename: name of the file
         :param folder_id: id of the folder to upload to
+        :return requests.Response object, containing the response from Landax
         """
         url = self.api_url + 'Documents/CreateDocument'
         document_object = json.dumps({'FolderId': folder_id})
