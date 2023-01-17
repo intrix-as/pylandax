@@ -132,6 +132,15 @@ class Client:
 
         return response
 
+    def document_pushcontent(self, document_data: io.BytesIO, document_id: int):
+        doc_id = str(document_id)
+        url = self.api_url + f'Documents/PushContent?documentid={doc_id}'
+
+        data = document_data.read()
+
+        response = requests.post(url, data=data, headers=self.headers)
+        return response
+
     # Creates a dict given the list of dicts list_in using the metakey
     @staticmethod
     def list_to_dict(list_in: [{}], metakey: str):
