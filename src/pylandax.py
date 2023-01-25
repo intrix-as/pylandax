@@ -163,5 +163,7 @@ class Client:
 
     @staticmethod
     def generate_url(base_url: str, html_params: dict):
+        if len(html_params) == 0:
+            return base_url
         result = base_url + '?' + urllib.parse.urlencode(html_params)
         return result

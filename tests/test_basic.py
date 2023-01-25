@@ -31,3 +31,6 @@ def test_generate_url():
 
     result = pylandax.Client.generate_url(base_url, params)
     assert result == 'https://test.landax.com?test=test&test2=test2'
+
+    result2 = pylandax.Client.generate_url(base_url, {})
+    assert result2 == 'https://test.landax.com'
