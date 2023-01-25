@@ -54,9 +54,11 @@ class Client:
 
         if '$top' in params:
             print('Warning: pylandax.get_all_data does not support $top parameter. It will be ignored.')
+            del params['$top']
 
         if '$skip' in params:
             print('Warning: pylandax.get_all_data does not support $skip parameter. It will be ignored.')
+            del params['$skip']
 
         params['$top'] = 1000
         base_url = f'{self.api_url}{data_model}'
