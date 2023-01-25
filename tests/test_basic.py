@@ -20,3 +20,14 @@ def test_basic():
     # Since the URL is bogus, this is what we expect
     except pylandax.LandaxAuthException:
         pass
+
+
+def test_generate_url():
+    base_url = 'https://test.landax.com'
+    params = {
+        'test': 'test',
+        'test2': 'test2'
+    }
+
+    result = pylandax.Client.generate_url(base_url, params)
+    assert result == 'https://test.landax.com?test=test&test2=test2'

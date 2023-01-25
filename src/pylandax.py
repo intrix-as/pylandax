@@ -3,6 +3,7 @@ import json
 import copy
 
 import requests
+import urllib
 
 
 class LandaxAuthException(Exception):
@@ -141,3 +142,8 @@ class Client:
             raise LandaxAuthException('Landax response was non-json. Body: ' + str(result.content))
 
         return response_data['access_token']
+
+    @staticmethod
+    def generate_url(base_url: str, html_params: dict):
+        result = base_url + '?' + urllib.parse.urlencode(html_params)
+        return result
