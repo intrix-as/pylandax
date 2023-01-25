@@ -34,8 +34,12 @@ class Client:
         self.headers['Authorization'] = 'Bearer ' + self.oauth_token
 
     # Returns a record with the given data_id (Id in in landax)
-    def get_single_data(self, data_model: str, data_id: int):
-        url = f'{self.api_url}{data_model}({str(data_id)})?$format=json'
+    def get_single_data(self, data_model: str, data_id: int, params: {} = None):
+        if params is None:
+            params = {}
+
+        base_url = f'{self.api_url}{data_model}({str(data_id)})'
+        url = self.generate_url(base_url, params)
         response = requests.get(url, headers=self.headers)
         if response.status_code == 404:
             return None
@@ -44,8 +48,20 @@ class Client:
         return data
 
     # Returns all records of the given data model
-    def get_all_data(self, data_model: str) -> [{}]:
-        initial_url = f'{self.api_url}{data_model}?$format=json&$top=1000'
+    def get_all_data(self, data_model: str, params: {} = None) -> [{}]:
+        if params is None:
+            params = {}
+
+        if '$top' in params:
+            print('Warning: pylandax.get_all_data does not support $top parameter. It will be ignored.')
+
+        if '$skip' in params:
+            print('Warning: pylandax.get_all_data does not support $skip parameter. It will be ignored.')
+
+        params['$top'] = 1000
+        base_url = f'{self.api_url}{data_model}'
+        initial_url = self.generate_url(base_url, params)
+
         data = self.request_data(initial_url)
         count = len(data)
         if count != 1000:
@@ -57,8 +73,10 @@ class Client:
         thousands = 0
         while count == 1000:
             thousands = thousands + 1
+            # This is okay because we know that $top is always included
             new_url = initial_url + '&$skip=' + str(thousands * 1000)
             new_data = self.request_data(new_url)
+            # + in this context is list concatenation
             data = data + new_data
             count = len(new_data)
 
