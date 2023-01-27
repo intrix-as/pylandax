@@ -33,8 +33,14 @@ class Client:
 
         self.headers['Authorization'] = 'Bearer ' + self.oauth_token
 
-    # Returns a record with the given data_id (Id in in landax)
-    def get_single_data(self, data_model: str, data_id: int, params: {} = None):
+    def get_single_data(self, data_model: str, data_id: int, params: {} = None) -> {}:
+        """
+        Returns a single record of the given data model
+        :param data_model: The data model to fetch in Landax, eg. Contacts, Projects, etc.
+        :param data_id: The id of the record to fetch
+        :param params: A dictionary of parameters passed as html query string parameters, eg. $filter, $expand
+        :return: A dictionary representing a record
+        """
         if params is None:
             params = {}
 
@@ -47,8 +53,13 @@ class Client:
         data = response.json()
         return data
 
-    # Returns all records of the given data model
     def get_all_data(self, data_model: str, params: {} = None) -> [{}]:
+        """
+        Returns all records of the given data model
+        :param data_model: The data model to fetch in Landax, eg. Contacts, Projects, etc.
+        :param params: A dictionary of parameters passed as html query string parameters, eg. $filter, $expand
+        :return: A list of dictionaries, each dictionary representing a record
+        """
         if params is None:
             params = {}
 
@@ -84,7 +95,13 @@ class Client:
 
         return data
 
-    def post_data(self, data_model: str, data: dict):
+    def post_data(self, data_model: str, data: {}) -> requests.Response:
+        """
+        Posts data to the given data model in Landax
+        :param data_model: The data model in Landax, eg. Contacts, Projects, etc.
+        :param data: the data to post, as a dictionary
+        :return: the requests.Response object returned from the post request
+        """
         url = self.api_url + data_model
         headers = copy.deepcopy(self.headers)
         headers['Content-Type'] = 'application/json'
@@ -92,8 +109,14 @@ class Client:
         response = requests.post(url, json=data, headers=headers)
         return response
 
-    # Patches the given data model with the given id with data
-    def patch_data(self, data_model: str, key: int, data: dict):
+    def patch_data(self, data_model: str, key: int, data: dict) -> requests.Response:
+        """
+        Patches the record with the given key and data
+        :param data_model: The data model in Landax, eg. Contacts, Projects, etc.
+        :param key: The key of the record to patch
+        :param data: The data to patch, as a dictionary
+        :return: the requests.Response object returned from the patch request
+        """
         url = f'{self.api_url}{data_model}({str(key)})'
         headers = copy.deepcopy(self.headers)
         headers['Content-Type'] = 'application/json'
@@ -102,14 +125,18 @@ class Client:
         return response
 
     # Deletes data with the given key
-    def delete_data(self, data_model: str, key: str):
+    def delete_data(self, data_model: str, key: str) -> requests.Response:
+        """
+        Deletes the record with the given key
+        :param data_model: The data model in Landax, eg. Contacts, Projects, etc.
+        :param key: The key of the record to delete
+        :return: the requests.Response object returned from the delete request
+        """
         url = f'{self.api_url}{data_model}({key})?$format=json'
         response = requests.delete(url, headers=self.headers)
-        if response.status_code == 404:
-            return None
         return response
 
-    # Helper function for get_data
+    # Helper for the public functions
     def request_data(self, url: str) -> []:
         response = requests.get(url, headers=self.headers)
         results = response.json()['value']
