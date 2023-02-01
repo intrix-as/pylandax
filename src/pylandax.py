@@ -1,6 +1,7 @@
 import pathlib
 import json
 import copy
+import io
 
 import requests
 import urllib
@@ -143,16 +144,49 @@ class Client:
         return results
 
     def upload_document(self, file: pathlib.Path, folder_id: int):
+        """
+        Upload a file to Landax by using a pathlib.Path object.
+        :param file: The file to upload
+        :param folder_id: The folder id to upload to
+        :return: requests.Response object, containing the response from Landax
+        """
+        if not isinstance(file, pathlib.Path):
+            raise TypeError('file must be a pathlib.Path')
+
+        if not file.exists():
+            raise FileNotFoundError('file does not exist: ' + str(file))
+
+        document_bytes = io.BytesIO(file.read_bytes())
+
+        return self.upload_document_raw(document_bytes, file.name, folder_id)
+
+    def upload_document_raw(self, document_data: io.BytesIO, filename: str, folder_id: int):
+        """
+        Upload a file to Landax by using an io.BytesIO object directly from memory.
+        :param document_data: io.BytesIO object to upload of the document
+        :param filename: name of the file
+        :param folder_id: id of the folder to upload to
+        :return requests.Response object, containing the response from Landax
+        """
         url = self.api_url + 'Documents/CreateDocument'
-        document = json.dumps({'FolderId': folder_id})
+        document_object = json.dumps({'FolderId': folder_id})
 
         files = {
-            'document': (None, document),
-            'fileData': (str(file.name), open(file, 'rb'))
+            'document': (None, document_object),
+            'fileData': (filename, document_data)
         }
 
         response = requests.post(url, files=files, headers=self.headers)
 
+        return response
+
+    def document_pushcontent(self, document_data: io.BytesIO, document_id: int):
+        doc_id = str(document_id)
+        url = self.api_url + f'Documents/PushContent?documentid={doc_id}'
+
+        data = document_data.read()
+
+        response = requests.post(url, data=data, headers=self.headers)
         return response
 
     # Creates a dict given the list of dicts list_in using the metakey
