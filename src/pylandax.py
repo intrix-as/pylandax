@@ -143,13 +143,16 @@ class Client:
         results = response.json()['value']
         return results
 
-    def upload_document(self, file: pathlib.Path, folder_id: int):
+    def upload_document(self, file: pathlib.Path, document_object: {} = None):
         """
         Upload a file to Landax by using a pathlib.Path object.
         :param file: The file to upload
-        :param folder_id: The folder id to upload to
+        :param document_object: The associated document object, per the Landax API
         :return: requests.Response object, containing the response from Landax
         """
+        if document_object is None:
+            document_object = {}
+
         if not isinstance(file, pathlib.Path):
             raise TypeError('file must be a pathlib.Path')
 
@@ -158,21 +161,24 @@ class Client:
 
         document_bytes = io.BytesIO(file.read_bytes())
 
-        return self.upload_document_raw(document_bytes, file.name, folder_id)
+        return self.upload_document_raw(document_bytes, file.name, document_object)
 
-    def upload_document_raw(self, document_data: io.BytesIO, filename: str, folder_id: int):
+    def upload_document_raw(self, document_data: io.BytesIO, filename: str, document_object: {} = None):
         """
         Upload a file to Landax by using an io.BytesIO object directly from memory.
         :param document_data: io.BytesIO object to upload of the document
         :param filename: name of the file
-        :param folder_id: id of the folder to upload to
+        :param document_object: The associated document object, per the Landax API
         :return requests.Response object, containing the response from Landax
         """
+        if document_object is None:
+            document_object = {}
+
         url = self.api_url + 'Documents/CreateDocument'
-        document_object = json.dumps({'FolderId': folder_id})
+        document_object_str = json.dumps(document_object)
 
         files = {
-            'document': (None, document_object),
+            'document': (None, document_object_str),
             'fileData': (filename, document_data)
         }
 
