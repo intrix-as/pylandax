@@ -2,6 +2,7 @@ import pathlib
 import json
 import copy
 import io
+import logging
 
 import requests
 import urllib
@@ -143,9 +144,9 @@ class Client:
         results = response.json()['value']
         return results
 
-    def upload_document(self, file: pathlib.Path, document_object: {} = None):
+    def upload_document_from_file(self, file: pathlib.Path, document_object: {} = None):
         """
-        Upload a file to Landax by using a pathlib.Path object.
+        Helper function to upload a file to Landax by using a pathlib.Path object.
         :param file: The file to upload
         :param document_object: The associated document object, per the Landax API
         :return: requests.Response object, containing the response from Landax
@@ -161,21 +162,28 @@ class Client:
 
         document_bytes = io.BytesIO(file.read_bytes())
 
-        return self.upload_document_raw(document_bytes, file.name, document_object)
+        return self.upload_document(document_bytes, file.name, document_object)
 
-    def upload_document_raw(self, document_data: io.BytesIO, filename: str, document_object: {} = None):
+    def upload_document(self, document_data: io.BytesIO, filename: str, folder_id: int, document_options: dict = None):
         """
         Upload a file to Landax by using an io.BytesIO object directly from memory.
         :param document_data: io.BytesIO object to upload of the document
         :param filename: name of the file
-        :param document_object: The associated document object, per the Landax API
+        :param folder_id: The folder ID to upload the document to
+        :param document_options: The document options as a dictionary, per the Landax API. Eg. IsTemplate, Number
         :return requests.Response object, containing the response from Landax
         """
-        if document_object is None:
-            document_object = {}
+        if document_options is None:
+            document_options = {}
+
+        if 'FolderId' in document_options:
+            logging.warning('\
+Warning: pylandax.upload_document does not support FolderId parameter in document_options. It will be ignored.')
+
+        document_options['FolderId'] = folder_id
 
         url = self.api_url + 'Documents/CreateDocument'
-        document_object_str = json.dumps(document_object)
+        document_object_str = json.dumps(document_options)
 
         files = {
             'document': (None, document_object_str),
