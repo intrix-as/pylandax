@@ -1,4 +1,4 @@
-import pathlib
+from pathlib import Path
 import json
 import copy
 import io
@@ -18,6 +18,8 @@ class Client:
             'username', 'password',
             'client_id', 'client_secret'
         ]
+
+        self.script_dir = Path(__file__).parent.absolute()
 
         for key, value in credentials.items():
             setattr(self, key, value)
@@ -144,7 +146,7 @@ class Client:
         results = response.json()['value']
         return results
 
-    def upload_document_from_file(self, file: pathlib.Path, document_object: {} = None):
+    def upload_document_from_file(self, file: Path, document_object: {} = None):
         """
         Helper function to upload a file to Landax by using a pathlib.Path object.
         :param file: The file to upload
@@ -154,7 +156,7 @@ class Client:
         if document_object is None:
             document_object = {}
 
-        if not isinstance(file, pathlib.Path):
+        if not isinstance(file, Path):
             raise TypeError('file must be a pathlib.Path')
 
         if not file.exists():
@@ -180,7 +182,11 @@ class Client:
             logging.warning('\
 Warning: pylandax.upload_document does not support FolderId parameter in document_options. It will be ignored.')
 
-        document_options['FolderId'] = folder_id
+        # HACK: module 8 is the document module, which is where we usually put documents
+        # However, documents linked to objects (in other modules) doesn't like that we pass FolderId here
+        # but rather wants it in DocumentLink, so we only pass FolderId if the module is 8 (default)
+        if 'ModuleId' not in document_options or document_options['ModuleId'] == 8:
+            document_options['FolderId'] = folder_id
 
         url = self.api_url + 'Documents/CreateDocument'
         document_object_str = json.dumps(document_options)
@@ -192,6 +198,91 @@ Warning: pylandax.upload_document does not support FolderId parameter in documen
 
         response = requests.post(url, files=files, headers=self.headers)
 
+        return response
+
+    def upload_linked_document(
+            self,
+            document_data: io.BytesIO, filename: str, folder_id: int,
+            module_name: str, linked_object_id: int,
+            document_options: dict | None) -> bool:
+        """
+        Upload a document to to Landax linked to another object via a module.
+        :param document_data: io.BytesIO object to upload of the document
+        :param filename: name of the file in Landax
+        :param folder_id: the folder id to upload the document to
+        :param module_name: name of the module to link the document to
+        :param linked_object_id: the object id to associate with the document
+        :param document_options: a dictionary of options to pass to the document object
+        :return: True if the document was successfully uploaded and linked, False if something went wrong
+        """
+
+        if document_options is None:
+            document_options = {}
+
+        if 'FolderId' in document_options:
+            logging.warning('\
+Warning: pylandax.upload_linked_document does not support ModuleId parameter in document_options. It will be ignored.')
+
+        with open(Path(self.script_dir, 'modules.json')) as file:
+            modules = json.loads(file.read())
+
+        if module_name not in modules:
+            logging.error(f'Error in pylandax.upload_linked_document: Module {module_name} not found.')
+            return False
+
+        module_id = modules[module_name]
+
+        # This mapping maps the module id to the corresponding field name in the DocumentLink object
+        # Should be updated as needed
+        id_key_mapping = {
+            10: 'CoworkerId',
+            24: 'EquipmentId'
+        }
+
+        if module_id not in id_key_mapping:
+            logging.error(f'Error in pylandax.upload_linked_document: Module {module_name}\'s id has no mapping to key')
+            return False
+
+        object_id_key = id_key_mapping[module_id]
+
+        document_options['ModuleId'] = module_id
+
+        upload_response = self.upload_document(document_data, filename, folder_id, document_options)
+        if upload_response.status_code != 200:
+            logging.error(f'Error uploading document with filename {filename}: ' + upload_response.text)
+            return False
+
+        document_id = upload_response.json()['value']['document']['Id']
+
+        link_response = self.link_document(document_id, folder_id, object_id_key, linked_object_id)
+        if link_response.status_code != 201:
+            logging.error(f'Error linking document with filename {filename}: ' + link_response.text)
+            # If the document upload succeeded, but the link failed, delete the document (or else it's stuck in limbo)
+            logging.info(f'Deleting document with filename {filename} since the link failed.')
+            self.delete_data('Documents', document_id)
+            return False
+
+        return True
+
+    def link_document(self, document_id: int, folder_id: int, object_metaid: str, object_id: int):
+        """
+        Links a document to an object in Landax within the corresponding module
+        A full list of module ids can be found in modules.json.
+        Since this depends on the associated document having a ModuleId, it's recommended to use upload_linked_document
+        :param document_id: The id of the document to link
+        :param folder_id: The folder id to upload the document to
+        :param object_metaid: The name of the field associated with the id of the object to link (eg. CoworkerId)
+        :param object_id: The id of the object to link to
+        :return:
+        """
+
+        documentlink = {
+            'FolderId': folder_id,
+            'DocumentId': document_id,
+            object_metaid: object_id
+        }
+
+        response = self.post_data('DocumentLink', documentlink)
         return response
 
     def document_pushcontent(self, document_data: io.BytesIO, document_id: int):
