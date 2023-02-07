@@ -294,6 +294,25 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
         response = requests.post(url, data=data, headers=self.headers)
         return response
 
+    def custom_request(self, partial_url, method='GET', data=None) -> requests.Response:
+        """
+        Makes a custom request to the Landax API, given a partial url and a method
+        :param partial_url: A partial URL to Landax, the part after v20/, eg. Documents/GetDocument
+        :param method: The method to use, either GET or POST
+        :param data: The data to send in the request, if any (only for POST)
+        :return: The response from the request
+        """
+        url = self.api_url + partial_url
+
+        if method == 'GET':
+            response = requests.get(url, headers=self.headers)
+        elif method == 'POST':
+            response = requests.post(url, json=data, headers=self.headers)
+        else:
+            raise ValueError('Invalid method')
+
+        return response
+
     # Creates a dict given the list of dicts list_in using the metakey
     @staticmethod
     def list_to_dict(list_in: [{}], metakey: str):
