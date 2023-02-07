@@ -204,7 +204,7 @@ Warning: pylandax.upload_document does not support FolderId parameter in documen
             self,
             document_data: io.BytesIO, filename: str, folder_id: int,
             module_name: str, linked_object_id: int,
-            document_options: dict | None) -> bool:
+            document_options: dict | None = None) -> bool:
         """
         Upload a document to to Landax linked to another object via a module.
         :param document_data: io.BytesIO object to upload of the document
