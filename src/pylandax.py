@@ -146,6 +146,15 @@ class Client:
         results = response.json()['value']
         return results
 
+    def get_documents(self, folder_id: int):
+        """
+        Gets a list of documents in the given folder
+        :param folder_id: The id of the folder to get documents from
+        :return: A list of dictionaries, each dictionary representing a document
+        """
+        params = {'$filter': f'FolderId eq {folder_id}'}
+        return self.get_all_data('Documents', params)
+
     def upload_document_from_file(self, file: Path, document_object: {} = None):
         """
         Helper function to upload a file to Landax by using a pathlib.Path object.
