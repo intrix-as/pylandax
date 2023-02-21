@@ -177,47 +177,33 @@ class Client:
 
     def upload_document(
             self,
-            document_data: io.BytesIO,
+            filedata: io.BytesIO,
             filename: str, folder_id: int,
-            document_options: dict = None, sub_objects: dict = None):
+            document_options: dict = None):
         """
         Upload a file to Landax by using an io.BytesIO object directly from memory.
-        :param document_data: io.BytesIO object to upload of the document
+        :param filedata: io.BytesIO object to upload of the document
         :param filename: name of the file
         :param folder_id: The folder ID to upload the document to
         :param document_options: The document options as a dictionary, per the Landax API. Eg. IsTemplate, Number
-        :param sub_objects: A list of sub objects to upload with the document. Eg. DocumentLink
         :return requests.Response object, containing the response from Landax
         """
         if document_options is None:
             document_options = {}
 
-        if sub_objects is None:
-            sub_objects = {}
-
         if 'FolderId' in document_options:
             logging.warning('\
 Warning: pylandax.upload_document does not support FolderId parameter in document_options. It will be ignored.')
 
-        # HACK: module 8 is the document module, which is where we usually put documents
-        # However, documents linked to objects (in other modules) doesn't like that we pass FolderId here
-        # but rather wants it in DocumentLink, so we only pass FolderId if the module is 8 (default)
-        if 'ModuleId' not in document_options or document_options['ModuleId'] == 8:
-            document_options['FolderId'] = folder_id
+        if 'ModuleId' in document_options:
+            logging.warning('\
+Warning: pylandax.upload_document does not support ModuleId parameter in document_options. It will be ignored. \
+To upload a document linked to an object in a module, use pylandax.upload_linked_document instead.')
+            del document_options['ModuleId']
 
-        url = self.api_url + 'Documents/CreateDocument'
-        document_object_str = json.dumps(document_options)
+        document_options['FolderId'] = folder_id
 
-        files = {
-            'document': (None, document_object_str),
-            'fileData': (filename, document_data)
-        }
-
-        for key, value in sub_objects.items():
-            files[key] = value
-
-        response = requests.post(url, files=files, headers=self.headers)
-
+        response = self.documents_createdocument(filedata, filename, document_options)
         return response
 
     def upload_linked_document(
