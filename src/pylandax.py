@@ -209,6 +209,9 @@ Warning: pylandax.upload_document does not support FolderId parameter in documen
 
         return response
 
+    def upload_document_from_files(self):
+        pass
+
     def upload_linked_document(
             self,
             document_data: io.BytesIO, filename: str, folder_id: int,
