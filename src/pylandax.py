@@ -175,17 +175,25 @@ class Client:
 
         return self.upload_document(document_bytes, file.name, document_object)
 
-    def upload_document(self, document_data: io.BytesIO, filename: str, folder_id: int, document_options: dict = None):
+    def upload_document(
+            self,
+            document_data: io.BytesIO,
+            filename: str, folder_id: int,
+            document_options: dict = None, sub_objects: dict = None):
         """
         Upload a file to Landax by using an io.BytesIO object directly from memory.
         :param document_data: io.BytesIO object to upload of the document
         :param filename: name of the file
         :param folder_id: The folder ID to upload the document to
         :param document_options: The document options as a dictionary, per the Landax API. Eg. IsTemplate, Number
+        :param sub_objects: A list of sub objects to upload with the document. Eg. DocumentLink
         :return requests.Response object, containing the response from Landax
         """
         if document_options is None:
             document_options = {}
+
+        if sub_objects is None:
+            sub_objects = {}
 
         if 'FolderId' in document_options:
             logging.warning('\
@@ -204,6 +212,9 @@ Warning: pylandax.upload_document does not support FolderId parameter in documen
             'document': (None, document_object_str),
             'fileData': (filename, document_data)
         }
+
+        for key, value in sub_objects.items():
+            files[key] = value
 
         response = requests.post(url, files=files, headers=self.headers)
 
