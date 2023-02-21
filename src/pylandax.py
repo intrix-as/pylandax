@@ -248,7 +248,7 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
 
         if module_name not in modules:
             logging.error(f'Error in pylandax.upload_linked_document: Module {module_name} not found.')
-            return False
+            return None
 
         module_id = modules[module_name]
 
