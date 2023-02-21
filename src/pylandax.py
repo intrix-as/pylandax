@@ -220,14 +220,11 @@ Warning: pylandax.upload_document does not support FolderId parameter in documen
 
         return response
 
-    def upload_document_from_files(self):
-        pass
-
     def upload_linked_document(
             self,
             document_data: io.BytesIO, filename: str, folder_id: int,
             module_name: str, linked_object_id: int,
-            document_options: dict = None) -> bool:
+            document_options: dict = None) -> requests.Response:
         """
         Upload a document to to Landax linked to another object via a module.
         :param document_data: io.BytesIO object to upload of the document
@@ -270,43 +267,21 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
 
         document_options['ModuleId'] = module_id
 
-        upload_response = self.upload_document(document_data, filename, folder_id, document_options)
+        sub_objects = {
+            'documentLink': {
+                'FolderId': folder_id,
+                object_id_key: linked_object_id
+            }
+        }
+
+        upload_response = self.upload_document(document_data, filename, folder_id, document_options, sub_objects)
         if upload_response.status_code != 200:
             logging.error(f'Error uploading document with filename {filename}: ' + upload_response.text)
             return False
 
+        return upload_response
+
         document_id = upload_response.json()['value']['document']['Id']
-
-        link_response = self.link_document(document_id, folder_id, object_id_key, linked_object_id)
-        if link_response.status_code != 201:
-            logging.error(f'Error linking document with filename {filename}: ' + link_response.text)
-            # If the document upload succeeded, but the link failed, delete the document (or else it's stuck in limbo)
-            logging.info(f'Deleting document with filename {filename} since the link failed.')
-            self.delete_data('Documents', document_id)
-            return False
-
-        return True
-
-    def link_document(self, document_id: int, folder_id: int, object_metaid: str, object_id: int):
-        """
-        Links a document to an object in Landax within the corresponding module
-        A full list of module ids can be found in modules.json.
-        Since this depends on the associated document having a ModuleId, it's recommended to use upload_linked_document
-        :param document_id: The id of the document to link
-        :param folder_id: The folder id to upload the document to
-        :param object_metaid: The name of the field associated with the id of the object to link (eg. CoworkerId)
-        :param object_id: The id of the object to link to
-        :return:
-        """
-
-        documentlink = {
-            'FolderId': folder_id,
-            'DocumentId': document_id,
-            object_metaid: object_id
-        }
-
-        response = self.post_data('DocumentLink', documentlink)
-        return response
 
     def document_pushcontent(self, document_data: io.BytesIO, document_id: int):
         doc_id = str(document_id)
