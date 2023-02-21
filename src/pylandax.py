@@ -222,12 +222,12 @@ Warning: pylandax.upload_document does not support FolderId parameter in documen
 
     def upload_linked_document(
             self,
-            document_data: io.BytesIO, filename: str, folder_id: int,
+            filedata: io.BytesIO, filename: str, folder_id: int,
             module_name: str, linked_object_id: int,
             document_options: dict = None) -> requests.Response:
         """
         Upload a document to to Landax linked to another object via a module.
-        :param document_data: io.BytesIO object to upload of the document
+        :param filedata: io.BytesIO object to upload of the document
         :param filename: name of the file in Landax
         :param folder_id: the folder id to upload the document to
         :param module_name: name of the module to link the document to
@@ -240,6 +240,10 @@ Warning: pylandax.upload_document does not support FolderId parameter in documen
             document_options = {}
 
         if 'FolderId' in document_options:
+            logging.warning('\
+Warning: pylandax.upload_linked_document does not support FolderId parameter in document_options. It will be ignored.')
+
+        if 'ModuleId' in document_options:
             logging.warning('\
 Warning: pylandax.upload_linked_document does not support ModuleId parameter in document_options. It will be ignored.')
 
@@ -261,27 +265,24 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
 
         if module_id not in id_key_mapping:
             logging.error(f'Error in pylandax.upload_linked_document: Module {module_name}\'s id has no mapping to key')
-            return False
+            return None
 
         object_id_key = id_key_mapping[module_id]
 
         document_options['ModuleId'] = module_id
 
-        sub_objects = {
-            'documentLink': {
-                'FolderId': folder_id,
-                object_id_key: linked_object_id
-            }
+        document_link = {
+            'FolderId': folder_id,
+            object_id_key: linked_object_id
         }
 
-        upload_response = self.upload_document(document_data, filename, folder_id, document_options, sub_objects)
+        upload_response = self.documents_createdocument(filedata, filename, document_options, document_link)
         if upload_response.status_code != 200:
             logging.error(f'Error uploading document with filename {filename}: ' + upload_response.text)
-            return False
 
         return upload_response
 
-    def document_createdocument(self, filename: str, filedata: io.BytesIO, document_object: dict, document_link: dict = None):
+    def documents_createdocument(self, filedata: io.BytesIO, filename: str, document_object: dict, document_link: dict = None):
         """
         Create a document in Landax
         :param filename: The filename of the document
