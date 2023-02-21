@@ -281,7 +281,26 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
 
         return upload_response
 
-        document_id = upload_response.json()['value']['document']['Id']
+    def document_createdocument(self, filename: str, filedata: io.BytesIO, document_object: dict, document_link: dict = None):
+        """
+        Create a document in Landax
+        :param filename: The filename of the document
+        :param filedata: The filedata of the document
+        :param document_object: The document object to create
+        :param document_link: The document link to create
+        :return: The response from Landax
+        """
+        files = {
+            'document': (None, json.dumps(document_object)),
+            'fileData': (filename, filedata)
+        }
+
+        if document_link is not None:
+            files['documentLink'] = (None, json.dumps(document_link))
+
+        url = self.api_url + 'Documents/CreateDocument'
+        response = requests.post(url, files=files, headers=self.headers)
+        return response
 
     def document_pushcontent(self, document_data: io.BytesIO, document_id: int):
         doc_id = str(document_id)
