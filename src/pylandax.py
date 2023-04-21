@@ -312,8 +312,13 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
             response = requests.get(url, headers=self.headers)
         elif method == 'POST':
             response = requests.post(url, json=data, headers=self.headers)
+        elif method == 'PATCH':
+            response = requests.patch(url, json=data, headers=self.headers)
+        elif method == 'DELETE':
+            response = requests.delete(url, headers=self.headers)
         else:
-            raise ValueError('Invalid method')
+            raise ValueError(
+                f'pylandax.custom_request: Invalid method: {method}. Accepted methods: GET, POST, PATCH, DELETE')
 
         return response
 
