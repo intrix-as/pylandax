@@ -75,27 +75,14 @@ class Client:
             print('Warning: pylandax.get_all_data does not support $skip parameter. It will be ignored.')
             del params['$skip']
 
-        params['$top'] = 1000
         base_url = f'{self.api_url}{data_model}'
         initial_url = self.generate_url(base_url, params)
-
-        data = self.request_data(initial_url)
-        count = len(data)
-        if count != 1000:
-            return data
-
-        # If count is 1000, there is a chance that there are more than 1000 records
-        # since Landax only returns 1000 records max at a time
-        # so we need to make additional requests until we get less than 1000
-        thousands = 0
-        while count == 1000:
-            thousands = thousands + 1
-            # This is okay because we know that $top is always included
-            new_url = initial_url + '&$skip=' + str(thousands * 1000)
-            new_data = self.request_data(new_url)
-            # + in this context is list concatenation
-            data = data + new_data
-            count = len(new_data)
+        response = self.request_raw(initial_url)
+        data = response.json()['value']
+        while '@odata.nextLink' in response.json():
+            new_url = response.json()['@odata.nextLink']
+            response = self.request_raw(new_url)
+            data = data + response.json()['value']
 
         return data
 
@@ -145,6 +132,10 @@ class Client:
         response = requests.get(url, headers=self.headers)
         results = response.json()['value']
         return results
+
+    def request_raw(self, url: str) -> requests.Response:
+        response = requests.get(url, headers=self.headers)
+        return response
 
     def get_documents(self, folder_id: int):
         """
