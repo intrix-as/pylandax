@@ -57,11 +57,12 @@ class Client:
         data = response.json()
         return data
 
-    def get_all_data(self, data_model: str, params: {} = None) -> [{}]:
+    def get_all_data(self, data_model: str, params: {} = None, select: [] = None) -> [{}]:
         """
         Returns all records of the given data model
         :param data_model: The data model to fetch in Landax, eg. Contacts, Projects, etc.
         :param params: A dictionary of parameters passed as html query string parameters, eg. $filter, $expand
+        :param select: A list of fields to select, eg. ['Id', 'Name']
         :return: A list of dictionaries, each dictionary representing a record
         """
         if params is None:
@@ -74,6 +75,9 @@ class Client:
         if '$skip' in params:
             print('Warning: pylandax.get_all_data does not support $skip parameter. It will be ignored.')
             del params['$skip']
+
+        if select is not None:
+            params['$select'] = ','.join(select)
 
         base_url = f'{self.api_url}{data_model}'
         initial_url = self.generate_url(base_url, params)
