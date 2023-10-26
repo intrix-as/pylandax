@@ -13,7 +13,7 @@ class LandaxAuthException(Exception):
 
 
 class Client:
-    def __init__(self, url: str, credentials: dict):
+    def __init__(self, url: str, credentials: dict, version='v20'):
         self.required_credentials = [
             'username', 'password',
             'client_id', 'client_secret'
@@ -30,7 +30,7 @@ class Client:
                 return
 
         self.base_url = f'https://{url}/'
-        self.api_url = self.base_url + 'api/v20/'
+        self.api_url = f'{self.base_url}api/{version}/'
         self.headers = {}
 
         self.oauth_token = self.get_oauth_token()
