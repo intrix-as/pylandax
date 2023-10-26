@@ -14,6 +14,13 @@ class LandaxAuthException(Exception):
 
 class Client:
     def __init__(self, url: str, credentials: dict, version='v20'):
+        """
+        Constructs a new pylandax client
+        :param url: The url of the Landax instance, eg. intrixtest.landax.no
+        :param credentials: A dictionary containing the credentials to use
+        :param version: The version of the API to use, defaults to v20
+        :return: A new pylandax client
+        """
         self.required_credentials = [
             'username', 'password',
             'client_id', 'client_secret'
