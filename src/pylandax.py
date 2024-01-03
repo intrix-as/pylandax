@@ -291,14 +291,32 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
         response = requests.post(url, files=files, headers=self.headers)
         return response
 
-    def document_pushcontent(self, document_data: io.BytesIO, document_id: int):
-        doc_id = str(document_id)
-        url = self.api_url + f'Documents/PushContent?documentid={doc_id}'
+    def documents_getcontent(self, document_id: int):
+        """
+        Retrieves the content of a document with the specified document ID.
+        :param document_id (int): the id of the document to retrieve
+        :return: The response object containing the content of the document.
+        """
+        initial_url = self.api_url + f'Documents/GetContent?documentid={document_id}&original=True&encode=raw'
 
-        data = document_data.read()
-
-        response = requests.post(url, data=data, headers=self.headers)
+        response = requests.get(initial_url, headers=self.headers)
+        
         return response
+
+    def document_pushcontent(self, document_data: io.BytesIO, document_id: int):
+            """
+            Pushes the content of a document with the specified document ID.
+            :param document_data (io.BytesIO): The content of the document as a BytesIO object.
+            :param document_id (int): The ID of the document.
+            :return: The response object containing the result of the request.
+            """
+            doc_id = str(document_id)
+            url = self.api_url + f'Documents/PushContent?documentid={doc_id}'
+
+            data = document_data.read()
+
+            response = requests.post(url, data=data, headers=self.headers)
+            return response
 
     def custom_request(self, partial_url, method='GET', data=None) -> requests.Response:
         """
