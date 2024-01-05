@@ -54,18 +54,18 @@ def test_all_document_functions():
     print(f'Get documents: {bool(get_documents)}\n')
 
     if bool(get_documents) == True:
-        documents_getcontent = client.documents_getcontent(get_documents[0]['Id'])
-        print(f'Documents get content: {documents_getcontent}\n')
+        get_document_content = client.get_document_content(get_documents[0]['Id'])
+        print(f'Documents get content: {get_document_content}\n')
 
-        if documents_getcontent.status_code == 200:        
-            documents_upload = client.upload_document(documents_getcontent.content, f'test-{get_documents[0]["FileName"]}', pylandax_test_folder_id)
+        if get_document_content.status_code == 200:        
+            documents_upload = client.upload_document(get_document_content.content, f'test-{get_documents[0]["FileName"]}', pylandax_test_folder_id)
             print(f'Documents upload: {documents_upload}\n')
 
             if documents_upload.status_code == 200:            
-                document_pushcontent = client.document_pushcontent(documents_getcontent.content, int(get_documents[0]['Id']))
-                print(f'Document push content: {document_pushcontent}\n')
+                push_document_content = client.push_document_content(get_document_content.content, int(get_documents[0]['Id']))
+                print(f'Document push content: {push_document_content}\n')
 
-                if document_pushcontent.status_code == 200:
+                if push_document_content.status_code == 200:
                     delete_document = client.delete_data('Documents', documents_upload.json()['value']['document']['DocumentId'])
                     print(f'Delete document: {delete_document}\n')
 
