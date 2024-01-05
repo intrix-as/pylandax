@@ -270,7 +270,7 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
 
         return upload_response
 
-    def documents_createdocument(self, filedata: io.BytesIO, filename: str, document_object: dict, document_link: dict = None):
+    def create_document(self, filedata: io.BytesIO, filename: str, document_object: dict, document_link: dict = None):
         """
         Create a document in Landax
         :param filename: The filename of the document
@@ -291,7 +291,7 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
         response = requests.post(url, files=files, headers=self.headers)
         return response
 
-    def documents_getcontent(self, document_id: int):
+    def get_document_content(self, document_id: int):
         """
         Retrieves the content of a document with the specified document ID.
         :param document_id (int): the id of the document to retrieve
@@ -303,7 +303,7 @@ Warning: pylandax.upload_linked_document does not support ModuleId parameter in 
         
         return response
 
-    def document_pushcontent(self, document_data: io.BytesIO, document_id: int):
+    def push_document_content(self, document_data: io.BytesIO, document_id: int):
             """
             Pushes the content of a document with the specified document ID.
             :param document_data (io.BytesIO): The content of the document as a BytesIO object.
