@@ -19,7 +19,7 @@ The library can be used as follows:
 ```(python)
 import pylandax
 
-url = 'https://eksempel.landax.no'
+url = 'eksempel.landax.no'
 credentials = {
   'username': 'my_user',
   'password': 'my_password',
@@ -35,8 +35,7 @@ result = client.get_all_data('Contacts')
 
 # Posting data, using Contacts as example again
 new_contact = {
-  'Name': 'Example Corp.',
-  'Address': 'Park road 123'
+  'FirstName': 'Example Corp.',
 }
 
 client.post_data('Contacts', new_contact)
